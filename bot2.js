@@ -339,7 +339,12 @@ async function checkForNewTokens() {
       
       // Получаем детальную информацию
       const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
-      token.banner = details.banner;
+      pair.banner =
+  pair.info?.header ||   // <-- вот это баннер
+  pair.info?.imageUrl ||
+  pair.info?.imageLargeUrl ||
+  pair.info?.image ||
+  null;
       // Отправляем в канал
       await sendToChannel(token, details);
       
@@ -450,6 +455,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
