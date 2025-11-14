@@ -61,10 +61,13 @@ function loadDatabase() {
 
 function saveDatabase() {
   try {
-    fs.writeFileSync(DATABASE_FILE, JSON.stringify([...processedTokens], null, 2), 'utf8');
-    console.log('💾 Database saved');
+    const data = [...processedTokens];
+    fs.writeFileSync(DATABASE_FILE, JSON.stringify(data, null, 2), 'utf8');
+    console.log(`💾 Database saved: ${data.length} tokens`);
+    return true;
   } catch (err) {
     console.error('❌ Database save error:', err.message);
+    return false;
   }
 }
 
@@ -277,6 +280,7 @@ async function checkForNewTokens() {
   }
   
   console.log(`📋 Found ${tokens.length} tokens in API`);
+  console.log(`📊 Current database size: ${processedTokens.size}`);
   
   let newCount = 0;
   for (const token of tokens) {
@@ -297,7 +301,16 @@ async function checkForNewTokens() {
       const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
       await sendToChannel(token, details);
       
+      // Add to set and save immediately
       processedTokens.add(tokenId);
+      const saved = saveDatabase();
+      
+      if (saved) {
+        console.log(`✅ Token saved to database. New size: ${processedTokens.size}`);
+      } else {
+        console.error(`❌ Failed to save token: ${tokenId}`);
+      }
+      
       newCount++;
       
       await new Promise(r => setTimeout(r, 2000)); // задержка между отправками
@@ -307,8 +320,8 @@ async function checkForNewTokens() {
   }
   
   if (newCount) {
-    saveDatabase();
     console.log(`✨ Processed ${newCount} new token(s)`);
+    console.log(`📊 Final database size: ${processedTokens.size}`);
   } else {
     console.log('ℹ️ All tokens already processed');
   }
@@ -347,10 +360,13 @@ bot.onText(/\/check/, async (msg) => {
 });
 
 bot.onText(/\/stats/, (msg) => {
+  const uptime = Math.floor((new Date() - botStartTime) / 1000 / 60);
   bot.sendMessage(msg.chat.id,
     `📈 *Bot Statistics*\n\n` +
     `Processed Tokens: ${processedTokens.size}\n` +
-    `Running Since: ${botStartTime.toLocaleString('en-US')}`,
+    `Running Since: ${botStartTime.toLocaleString('en-US')}\n` +
+    `Uptime: ${uptime} minutes\n` +
+    `Database File: ${fs.existsSync(DATABASE_FILE) ? '✅ Exists' : '❌ Missing'}`,
     { parse_mode: 'Markdown' }
   );
 });
@@ -367,8 +383,13 @@ bot.onText(/\/getchatid/, (msg) => {
 bot.onText(/\/clear/, (msg) => {
   const cleared = processedTokens.size;
   processedTokens.clear();
-  saveDatabase();
-  bot.sendMessage(msg.chat.id, `🗑️ Database cleared!\nRemoved ${cleared} token(s)`);
+  const saved = saveDatabase();
+  
+  if (saved) {
+    bot.sendMessage(msg.chat.id, `🗑️ Database cleared!\nRemoved ${cleared} token(s)\n✅ Changes saved to file`);
+  } else {
+    bot.sendMessage(msg.chat.id, `🗑️ Database cleared in memory (${cleared} tokens)\n❌ Failed to save to file`);
+  }
 });
 
 bot.onText(/\/list/, (msg) => {
@@ -399,6 +420,8 @@ bot.on('error', (error) => {
 // Старт бота
 async function startBot() {
   console.log('🤖 Starting bot...');
+  console.log(`📂 Database path: ${DATABASE_FILE}`);
+  
   loadDatabase();
   
   console.log('🔍 Running initial check...');
@@ -408,6 +431,7 @@ async function startBot() {
   console.log(`✅ Bot is running!`);
   console.log(`⏰ Check interval: ${CHECK_INTERVAL / 1000} seconds`);
   console.log(`📢 Target channel: ${CHANNEL_ID}`);
+  console.log(`📊 Current database size: ${processedTokens.size}`);
 }
 
 // Обработка ошибок
@@ -437,4 +461,3 @@ startBot().catch(err => {
   console.error('❌ Fatal error during bot startup:', err);
   process.exit(1);
 });
-
