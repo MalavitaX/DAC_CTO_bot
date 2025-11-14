@@ -11,7 +11,7 @@ const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
 const CHECK_INTERVAL = parseInt(process.env.CHECK_INTERVAL) || 20000;
 const BOT_USERNAME = process.env.BOT_USERNAME || '@DAC_CTO_bot';
 const DATABASE_FILE = path.join(__dirname, 'database.json');
-
+const botStartTime = new Date();
 // Инициализация бота
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -359,7 +359,7 @@ bot.onText(/\/stats/, (msg) => {
   bot.sendMessage(chatId, 
     `📈 *Statistics*\n\n` +
     `🔢 Total Processed Tokens: ${processedTokens.size}\n` +
-    `⏰ Working from: ${new Date().toLocaleString('ru-RU')}`,
+    `⏰ Working from: ${botStartTime.toLocaleString('ru-RU')}`,
     { parse_mode: 'Markdown' }
   );
 });
@@ -412,4 +412,5 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
