@@ -331,22 +331,33 @@ async function checkForNewTokens() {
   
   let newTokensCount = 0;
   
-  for (const token of tokens) {
-    const tokenId = `${token.chainId}-${token.tokenAddress}`;
-    
-    if (!processedTokens.has(tokenId)) {
-      console.log(`🆕 Spotted New Token: ${token.tokenAddress} (${token.chainId})`);
-      
-      // Получаем детальную информацию
-      const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
-      pair.banner =
-  pair.info?.header ||   // <-- вот это баннер
-  pair.info?.imageUrl ||
-  pair.info?.imageLargeUrl ||
-  pair.info?.image ||
-  null;
-      // Отправляем в канал
-      await sendToChannel(token, details);
+ for (const token of tokens) {
+  const tokenId = `${token.chainId}-${token.tokenAddress}`;
+
+  if (!processedTokens.has(tokenId)) {
+    console.log(`🆕 Spotted New Token: ${token.tokenAddress} (${token.chainId})`);
+
+    // Получаем детальную информацию
+    const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
+
+    // Берём header для баннера
+    if (details) {
+      details.header =
+        details.info?.header || 
+        details.info?.imageUrl ||
+        details.info?.imageLargeUrl ||
+        details.info?.image ||
+        null;
+    }
+
+    // Отправляем в канал
+    await sendToChannel(token, details);
+
+    processedTokens.add(tokenId);
+    newTokensCount++;
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+}
       
       // Добавляем в базу
       processedTokens.add(tokenId);
@@ -455,6 +466,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
