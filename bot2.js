@@ -12,6 +12,14 @@ const CHECK_INTERVAL = parseInt(process.env.CHECK_INTERVAL) || 20000;
 const BOT_USERNAME = process.env.BOT_USERNAME || '@DAC_CTO_bot';
 const DATABASE_FILE = path.join(__dirname, 'database.json');
 const botStartTime = new Date();
+const PORT = process.env.PORT || 3000;
+
+const http = require('http');
+http.createServer((req, res) => {
+  res.end('OK'); // просто отвечаем на запросы
+}).listen(PORT, () => {
+  console.log(`Fake server running on port ${PORT}`);
+});
 // Инициализация бота
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -412,6 +420,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
