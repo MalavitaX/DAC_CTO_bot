@@ -339,7 +339,7 @@ async function checkForNewTokens() {
       
       // Получаем детальную информацию
       const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
-      
+      token.banner = details.banner;
       // Отправляем в канал
       await sendToChannel(token, details);
       
@@ -450,6 +450,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
