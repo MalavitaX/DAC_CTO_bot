@@ -14,7 +14,7 @@ const DATABASE_FILE = path.join(__dirname, 'database.json');
 const botStartTime = new Date();
 const http = require('http');
 // Жёстко задаём порт
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 // -------------------------------
 // 2️⃣ Поднимаем простой сервер, чтобы Render видел открытый порт
@@ -431,6 +431,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
