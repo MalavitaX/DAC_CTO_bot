@@ -12,9 +12,7 @@ const CHECK_INTERVAL = parseInt(process.env.CHECK_INTERVAL) || 20000;
 const BOT_USERNAME = process.env.BOT_USERNAME || '@DAC_CTO_bot';
 const DATABASE_FILE = path.join(__dirname, 'database.json');
 const botStartTime = new Date();
-const PORT = process.env.PORT || 3000;
 const http = require('http');
-
 // Жёстко задаём порт
 const PORT = 3000;
 
@@ -423,6 +421,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
