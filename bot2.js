@@ -325,40 +325,49 @@ async function checkForNewTokens() {
   const tokens = await fetchLatestCTOs();
   
   if (!tokens || tokens.length === 0) {
-    console.log('ℹ️ Spotted New Tokens');
+    console.log('ℹ️ No New Tokens');
     return;
   }
   
   let newTokensCount = 0;
   
- for (const token of tokens) {
-  const tokenId = `${token.chainId}-${token.tokenAddress}`;
+  for (const token of tokens) {
+    const tokenId = `${token.chainId}-${token.tokenAddress}`;
 
-  if (!processedTokens.has(tokenId)) {
-    console.log(`🆕 Spotted New Token: ${token.tokenAddress} (${token.chainId})`);
+    if (!processedTokens.has(tokenId)) {
+      console.log(`🆕 Spotted New Token: ${token.tokenAddress} (${token.chainId})`);
 
-    // Получаем детальную информацию
-    const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
+      // Получаем детальную информацию
+      const details = await fetchTokenDetails(token.chainId, token.tokenAddress);
 
-    // Берём header для баннера
-    if (details) {
-      details.header =
-        details.info?.header || 
-        details.info?.imageUrl ||
-        details.info?.imageLargeUrl ||
-        details.info?.image ||
-        null;
+      // Берём header для баннера
+      if (details) {
+        details.header =
+          details.info?.header || 
+          details.info?.imageUrl ||
+          details.info?.imageLargeUrl ||
+          details.info?.image ||
+          null;
+      }
+
+      // Отправляем в канал
+      await sendToChannel(token, details);
+
+      processedTokens.add(tokenId);
+      newTokensCount++;
+      
+      // Небольшая задержка между отправками
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
+  }
 
-    // Отправляем в канал
-    await sendToChannel(token, details);
-
-    processedTokens.add(tokenId);
-    newTokensCount++;
-    await new Promise(resolve => setTimeout(resolve, 2000));
+  if (newTokensCount > 0) {
+    saveDatabase();
+    console.log(`✨ Spotted New Tokens: ${newTokensCount}`);
+  } else {
+    console.log('ℹ️ All Tokens Processed');
   }
 }
-      
       // Добавляем в базу
       processedTokens.add(tokenId);
       newTokensCount++;
@@ -466,6 +475,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
