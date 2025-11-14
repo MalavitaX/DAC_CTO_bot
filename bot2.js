@@ -26,19 +26,14 @@ http.createServer((req, res) => {
 
 // -------------------------------
 // 3️⃣ Один экземпляр бота
+let bot; // объявляем вне блока if
 if (!process.env.BOT_INSTANCE || process.env.BOT_INSTANCE !== "1") {
-  process.env.BOT_INSTANCE = "1"; // ставим флаг, чтобы другие процессы не запускали бота
+  process.env.BOT_INSTANCE = "1";
 
-// Инициализация бота
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-
-  // Пример обработчика сообщений
-  bot.on('message', (msg) => {
-    console.log('Сообщение от', msg.from.username, ':', msg.text);
-  });
+  bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
   console.log('🤖 Bot is running!');
-} // <-- закрывающая скобка для if
+}
 // База данных обработанных токенов
 let processedTokens = new Set();
 
@@ -436,6 +431,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
