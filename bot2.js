@@ -93,7 +93,7 @@ async function fetchTokenDetails(chainId, tokenAddress) {
     // Находим пару на нужной сети
     const pairs = response.data.pairs || [];
     const pair = pairs.find(p => p.chainId.toLowerCase() === chainId.toLowerCase()) || pairs[0];
-    
+    pair.banner = pair.info?.imageUrl || null;
     return pair;
   } catch (error) {
     console.error(`❌ Error fetching token data ${tokenAddress}:`, error.message);
@@ -278,7 +278,6 @@ const keyboard = {
     ]
   ]
 };
-    ctoData.banner = pair.info?.imageUrl;   // <-- добавить!
 // Попытка взять баннер DexScreener
 const banner =
   ctoData.banner ||
@@ -451,6 +450,7 @@ process.on('SIGINT', () => {
 // Запуск
 
 startBot();
+
 
 
 
