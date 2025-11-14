@@ -101,7 +101,9 @@ async function fetchTokenDetails(chainId, tokenAddress) {
     const pair = pairs.find(p => p.chainId && p.chainId.toLowerCase() === chainId.toLowerCase()) || pairs[0];
     
     if (pair) {
-      pair.banner = pair.info?.imageUrl || null;
+      // Приоритет: header -> imageUrl -> icon
+      pair.banner = pair.info?.header || pair.info?.imageUrl || pair.info?.icon || null;
+      console.log(`📸 Banner URL for ${tokenAddress}:`, pair.banner);
     }
     
     return pair || null;
@@ -230,7 +232,15 @@ async function sendToChannel(ctoData, tokenDetails) {
       ]]
     };
     
-    const banner = ctoData.banner || ctoData.image || tokenDetails?.banner || null;
+    // Приоритет: header из CTO данных -> header из token details -> другие изображения
+    const banner = ctoData.header || 
+                   tokenDetails?.info?.header || 
+                   tokenDetails?.banner || 
+                   ctoData.banner || 
+                   ctoData.image || 
+                   null;
+    
+    console.log(`📤 Sending to channel. Banner:`, banner ? 'Yes' : 'No');
     
     if (banner) {
       await bot.sendPhoto(CHANNEL_ID, banner, {
