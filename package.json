@@ -8,7 +8,7 @@
     "start": "node bot2.js"
   },
   "engines": {
-    "node": "18.x"
+    "node": "18.16.0"
   },
   "keywords": [],
   "author": "",
